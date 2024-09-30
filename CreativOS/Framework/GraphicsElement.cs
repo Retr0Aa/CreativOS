@@ -1,4 +1,5 @@
 ﻿using Cosmos.System.Graphics;
+using CosmosTTF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace CreativOS.Framework
 {
-    public interface GraphicsElement
+    public interface IGraphicsElement
     {
-        public void RenderElement(Canvas canvas);
+        public void RenderElement(Canvas canvas, CGSSurface surface, TTFFont notoRegular, TTFFont notoItalic, TTFFont notoBold);
     }
 }

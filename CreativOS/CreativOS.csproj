@@ -25,6 +25,11 @@
         <PackageReference Include="Cosmos.Debug.Kernel" Version="0-*" NoWarn="NU1604" />
         <PackageReference Include="Cosmos.System2" Version="0-*" NoWarn="NU1604" />
         <PackageReference Include="Cosmos.Plugs" Version="0-*" NoWarn="NU1604" />
+        <PackageReference Include="CosmosTTF" Version="4.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="isoFiles\" />
     </ItemGroup>
 
 </Project>

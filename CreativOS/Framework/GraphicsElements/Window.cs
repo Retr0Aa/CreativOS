@@ -1,28 +1,38 @@
 ﻿using Cosmos.System.Graphics;
 using Cosmos.System;
 using System.Drawing;
+using System.Collections.Generic;
+using CreativOS.Framework.GraphicsElements.Controls;
+using CosmosTTF;
 
 namespace CreativOS.Framework.GraphicsElements
 {
-    public class Window : GraphicsElement
+    public class Window : IGraphicsElement
     {
         private int width;
         private int height;
         private int posX;
         private int posY;
+        private string title;
         private bool isDragging = false;
         private int dragOffsetX;
         private int dragOffsetY;
         private int topBarHeight;
         private static Window activeWindow = null;  // Tracks the currently focused window
 
-        public Window(int width, int height, int posX, int posY)
+        private List<Control> controls;
+
+        public Window(int width, int height, int posX, int posY, List<Control> controls, string title)
         {
             this.width = width;
             this.height = height;
             this.posX = posX;
             this.posY = posY;
+            this.title = title;
+
             topBarHeight = 20;
+
+            this.controls = controls;
         }
 
         public bool IsActive()
@@ -67,7 +77,7 @@ namespace CreativOS.Framework.GraphicsElements
             }
         }
 
-        public void RenderElement(Canvas canvas)
+        public void RenderElement(Canvas canvas, CGSSurface surface, TTFFont notoRegular, TTFFont notoItalic, TTFFont notoBold)
         {
             // Shadow effect
             for (int i = 0; i < 5; i++)
@@ -81,9 +91,29 @@ namespace CreativOS.Framework.GraphicsElements
             canvas.DrawRectangle(Color.Black, posX, posY, width, height);
 
             // Draw title bar
-            canvas.DrawFilledRectangle(Color.FromArgb(10, 10, 10), posX, posY, width, topBarHeight);
-            canvas.DrawFilledRectangle(Color.Blue, posX, posY, width, 5);
+            int gradientCounter = 100;
+            for (int y = 0; y < topBarHeight; y++)
+            {
+                if (gradientCounter >= 0)
+                {
+                    canvas.DrawLine(Color.FromArgb(gradientCounter, gradientCounter, gradientCounter), posX, posY + y, width + posX, posY + y);
+                    gradientCounter-=2;
+                }
+            }
+
+            if (activeWindow == this)
+                canvas.DrawFilledRectangle(Color.Blue, posX, posY, width, 3);
+
+            notoBold.DrawToSurface(surface, 16, posX + 3, posY + topBarHeight - 3, title, Color.White);
+
             canvas.DrawRectangle(Color.Black, posX, posY, width, topBarHeight);
+
+            foreach (var control in controls)
+            {
+                control.SetPosition(posX + 1 + control.GetDefaultX(), posY + topBarHeight + 1 + control.GetDefaultY());
+
+                control.RenderControl(canvas, surface, notoRegular, notoItalic, notoBold);
+            }
         }
     }
 }

@@ -1,27 +1,51 @@
 ﻿using Cosmos.System;
 using Cosmos.System.Graphics;
+using CosmosTTF;
 using CreativOS.Framework.GraphicsElements;
+using CreativOS.Framework.GraphicsElements.Controls;
+using CreativOS.Framework.Processes;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 
 namespace CreativOS.Framework
 {
     public class GraphicsManager
     {
         Canvas canvas;
+        CGSSurface surface;
+        
+        TTFFont notoRegular;
+        TTFFont notoItalic;
+        TTFFont notoBold;
 
         // Graphics Elements
         Taskbar taskbar;
         List<Window> windows;
 
-        public GraphicsManager()
+        List<Process> processes;
+
+        public GraphicsManager(List<Process> processes)
         {
             taskbar = new Taskbar();
             windows = new List<Window>();
 
-            // Adding some windows for demonstration
-            windows.Add(new Window(600, 400, 300, 100));
-            windows.Add(new Window(600, 400, 100, 100));
+            this.processes = processes;
+
+            foreach (var process in processes)
+            {
+                if (process is DesktopProcess)
+                {
+                    windows.Add(new Window(600, 400, 100, 100, ((DesktopProcess) process).controls, "Hello World!"));
+                }
+            }
+        }
+
+        public void AddProcessGraphic(Process process)
+        {
+            processes.Add(process);
+
+            windows.Add(new Window(600, 400, 100, 100, ((DesktopProcess)process).controls, "Hello World!"));
         }
 
         public void StartGraphics()
@@ -30,6 +54,11 @@ namespace CreativOS.Framework
             MouseManager.ScreenHeight = 720;
 
             canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(1280, 720, ColorDepth.ColorDepth32));
+            surface = new CGSSurface(canvas);
+
+            notoRegular = new TTFFont(File.ReadAllBytes(@"1:\NotoSans-Regular.ttf"));
+            notoItalic = new TTFFont(File.ReadAllBytes(@"1:\NotoSans-Italic.ttf"));
+            notoBold = new TTFFont(File.ReadAllBytes(@"1:\NotoSans-Bold.ttf"));
         }
 
         public void RenderGraphics()
@@ -37,13 +66,10 @@ namespace CreativOS.Framework
             // Clear the canvas
             canvas.Clear(Color.Gray);
 
-            // Render the taskbar
-            taskbar.RenderElement(canvas);
-
             // Update and render all windows
             for (int i = 0; i < windows.Count; i++)
             {
-                windows[i].RenderElement(canvas);
+                windows[i].RenderElement(canvas, surface, notoRegular, notoItalic, notoBold);
                 windows[i].Update();
 
                 // Check if the window is active and bring it to the top
@@ -56,6 +82,9 @@ namespace CreativOS.Framework
                     break;  // Only move one window per frame
                 }
             }
+
+            // Render the taskbar
+            taskbar.RenderElement(canvas, surface, notoRegular, notoItalic, notoBold);
 
             // Draw the mouse cursor
             int mouseX = (int)MouseManager.X;
